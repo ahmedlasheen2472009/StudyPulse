@@ -5,6 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-apk:
     name: Build & Release Android APK
@@ -26,9 +29,6 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Install npm dependencies
         run: npm ci --legacy-peer-deps
 
@@ -44,15 +44,15 @@ jobs:
       - name: Build Debug APK with Gradle
         run: |
           cd android
-          ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleDebug
 
-      - name: Upload APK to GitHub Artifacts
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: BioAdapt-Debug-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
 
-      - name: Create or Update GitHub Release with APK
+      - name: Create GitHub Release with APK
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
@@ -60,9 +60,9 @@ jobs:
           name: "BioAdapt Android APK (v1.0.0)"
           body: |
             ### Study Pulse: BioAdapt Android App Release
-            Download the `app-debug.apk` directly to your Android device to install the app.
+            Download the `app-debug.apk` directly to your phone to install BioAdapt.
             
-            - **Prototype Category**: Regeneron ISEF (Embedded Systems)
+            - **Prototype**: Regeneron ISEF (Embedded Systems)
             - **Package**: `com.bioadapt.app`
           files: android/app/build/outputs/apk/debug/app-debug.apk
         env:
